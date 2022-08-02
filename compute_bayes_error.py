@@ -28,8 +28,7 @@ class GaussianBayes:
                                    n_skip=9,
                                    X_init=subsetsim.tracker.x_inits())
         hdr.run(verbose=False)
-        hdr_integral = hdr.tracker.integral()
-        return hdr_integral
+        return hdr.tracker.integral()
 
     def _form_constraints(self, k):
         not_k_ix = [i for i in range(self.K) if i != k]
@@ -80,8 +79,7 @@ class GaussianBayesDiag:
                                    n_skip=9,
                                    X_init=subsetsim.tracker.x_inits())
         hdr.run(verbose=False)
-        hdr_integral = hdr.tracker.integral()
-        return hdr_integral
+        return hdr.tracker.integral()
 
     def _form_constraints(self, k):
         not_k_ix = [i for i in range(self.K) if i != k]
@@ -132,41 +130,34 @@ class GaussianBayesLight:
                                            n_skip=9,
                                            X_init=subsetsim.tracker.x_inits())
         hdr.run(verbose=False)
-        hdr_integral = hdr.tracker.integral()
-        return hdr_integral
+        return hdr.tracker.integral()
 
     def _form_constraints(self, k, fast=True, low_mem=False):
         not_k_ix = [i for i in range(self.K) if i != k]
         mu_k = self.means[k]
+        b = []
         if fast:
             # this is much more memory efficient since we never need to compute the full matrix A, but just the dot products comprising AA^T
             if low_mem:
-                b = []
                 AAT = np.empty(shape=(self.K - 1, self.K - 1))
-                jj = 0
-                for j in not_k_ix:
+                for jj, j in enumerate(not_k_ix):
                     mu_j = self.means[j]
                     bjk = np.dot(mu_j, np.dot(self.cov_inv, mu_j)) - np.dot(mu_k, np.dot(self.cov_inv, mu_k))
                     Ajk = 2 * (np.dot(self.cov_inv, mu_k) - np.dot(self.cov_inv, mu_j))
                     bjk += np.dot(Ajk, mu_k)
                     Ajk = np.dot(np.sqrt(self.cov), Ajk)  # NOTE: this assumes covariance is diagonal
                     b.append(bjk)
-                    ii = 0
-                    for i in not_k_ix[:j]:
+                    for ii, i in enumerate(not_k_ix[:j]):
                         mu_i = self.means[i]
                         Aik = 2 * (np.dot(self.cov_inv, mu_k) - np.dot(self.cov_inv, mu_i))
                         Aik = np.dot(np.sqrt(self.cov), Aik).reshape(-1, 1)  # NOTE: this assumes covariance is diagonal
                         Aji = np.dot(Ajk, Aik)
                         AAT[jj, ii] = Aji
                         AAT[ii, jj] = Aji
-                        ii += 1
-                    jj += 1
-
                 A = sqrtm(AAT)
 
-                # compute the full matrix A, and then AA^T, uses lots of memory
+                        # compute the full matrix A, and then AA^T, uses lots of memory
             else:
-                b = []
                 A = []
                 for j in not_k_ix:
                     mu_j = self.means[j]
@@ -181,9 +172,7 @@ class GaussianBayesLight:
 
             return A, np.array(b).reshape(-1, 1)
 
-        # this is the original method, which is slow and memory inefficient
         else:
-            b = []
             A = []
             for j in not_k_ix:
                 mu_j = self.means[j]

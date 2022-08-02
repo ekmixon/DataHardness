@@ -37,25 +37,14 @@ class ActNorm(nn.Module):
             self.is_initialized += 1.
 
     def _center(self, x, reverse=False):
-        if reverse:
-            return x - self.bias
-        else:
-            return x + self.bias
+        return x - self.bias if reverse else x + self.bias
 
     def _scale(self, x, sldj, reverse=False):
         logs = self.logs
-        if reverse:
-            x = x * logs.mul(-1).exp()
-        else:
-            x = x * logs.exp()
-
+        x = x * logs.mul(-1).exp() if reverse else x * logs.exp()
         if sldj is not None:
             ldj = logs.sum() * x.size(2) * x.size(3)
-            if reverse:
-                sldj = sldj - ldj
-            else:
-                sldj = sldj + ldj
-
+            sldj = sldj - ldj if reverse else sldj + ldj
         return x, sldj
 
     def forward(self, x, ldj=None, reverse=False):
@@ -69,7 +58,4 @@ class ActNorm(nn.Module):
             x = self._center(x, reverse)
             x, ldj = self._scale(x, ldj, reverse)
 
-        if self.return_ldj:
-            return x, ldj
-
-        return x
+        return (x, ldj) if self.return_ldj else x

@@ -23,7 +23,7 @@ class Glow(nn.Module):
         num_levels (int): Number of levels in the entire model.
         num_steps (int): Number of steps of flow for each level.
     """
-    def __init__(self, num_channels, num_levels, num_steps, input_shape=(3, 32, 32), q=[0.1 for x in range(10)]):
+    def __init__(self, num_channels, num_levels, num_steps, input_shape=(3, 32, 32), q=[0.1 for _ in range(10)]):
         super(Glow, self).__init__()
 
         # Use bounds to rescale images before converting to logits, not learned
@@ -42,12 +42,10 @@ class Glow(nn.Module):
     def forward(self, x, reverse=False):
         if reverse:
             sldj = torch.zeros(x.size(0), device=x.device)
-        else:
-            # Expect inputs in [0, 1]
-            if x.min() < 0 or x.max() > 1:
-                raise ValueError('Expected x in [0, 1], got min/max {}/{}'
-                                 .format(x.min(), x.max()))
+        elif x.min() < 0 or x.max() > 1:
+            raise ValueError(f'Expected x in [0, 1], got min/max {x.min()}/{x.max()}')
 
+        else:
             # De-quantize and convert to logits
             x, sldj = self._pre_process(x)
 
@@ -188,7 +186,7 @@ class GlowAdditive(nn.Module):
         num_levels (int): Number of levels in the entire model.
         num_steps (int): Number of steps of flow for each level.
     """
-    def __init__(self, num_channels, num_levels, num_steps, input_shape=(3, 32, 32), q=[0.1 for x in range(10)]):
+    def __init__(self, num_channels, num_levels, num_steps, input_shape=(3, 32, 32), q=[0.1 for _ in range(10)]):
         super(GlowAdditive, self).__init__()
 
         # Use bounds to rescale images before converting to logits, not learned
@@ -206,12 +204,10 @@ class GlowAdditive(nn.Module):
     def forward(self, x, reverse=False):
         if reverse:
             sldj = torch.zeros(x.size(0), device=x.device)
-        else:
-            # Expect inputs in [0, 1]
-            if x.min() < 0 or x.max() > 1:
-                raise ValueError('Expected x in [0, 1], got min/max {}/{}'
-                                 .format(x.min(), x.max()))
+        elif x.min() < 0 or x.max() > 1:
+            raise ValueError(f'Expected x in [0, 1], got min/max {x.min()}/{x.max()}')
 
+        else:
             # De-quantize and convert to logits
             x, sldj = self._pre_process(x)
 

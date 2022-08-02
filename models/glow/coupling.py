@@ -106,11 +106,7 @@ class AdditiveCoupling(nn.Module):
         t = self.nn(x_id)
 
         #  translate only
-        if reverse:
-            x_change = x_change - t
-        else:
-            x_change = x_change + t
-
+        x_change = x_change - t if reverse else x_change + t
         x = torch.cat((x_change, x_id), dim=1)
 
         return x, ldj

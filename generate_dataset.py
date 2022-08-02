@@ -68,11 +68,14 @@ if __name__ == "__main__":
         images_t, labels_t = sample(net, args.batch_sz, device=device, priors=priors, y=None, temperature=args.temperature)
         images.append(images_t)
         labels.append(labels_t)
-        print('batch # ' + str(batch) + ' processed...')
+        print(f'batch # {str(batch)} processed...')
 
     images = torch.cat(images)
     labels = torch.cat(labels)
 
     print('generated dataset of size ', images.shape)
     os.makedirs(args.save_fp, exist_ok=True)
-    torch.save({'images': (images * 255.999).type(torch.uint8), 'labels': labels}, args.save_fp+'/data.h')
+    torch.save(
+        {'images': (images * 255.999).type(torch.uint8), 'labels': labels},
+        f'{args.save_fp}/data.h',
+    )

@@ -32,7 +32,7 @@ def main(args):
     torch.cuda.manual_seed_all(args.seed)
 
     # No normalization applied, since Glow expects inputs in (0, 1)
-    if args.dataset == 'MNIST' or args.dataset == 'FashionMNIST' or args.dataset == 'SVHN':
+    if args.dataset in ['MNIST', 'FashionMNIST', 'SVHN']:
         transform = transforms.Compose([
             transforms.Resize(32),
             transforms.ToTensor()
@@ -145,7 +145,7 @@ def train(epoch, net, trainloader, device, optimizer, scheduler, loss_fn, max_gr
         'net_config': (net.module.input_shape, net.module.q)
     }
     os.makedirs(output_dir, exist_ok=True)
-    torch.save(state, output_dir + '/latest.pth.tar')
+    torch.save(state, f'{output_dir}/latest.pth.tar')
 
 
 @torch.no_grad()
@@ -213,7 +213,7 @@ def test(epoch, net, testloader, device, loss_fn, num_samples, output_dir, sampl
             'net_config': (net.module.input_shape, net.module.q)
         }
         os.makedirs(output_dir, exist_ok=True)
-        torch.save(state, output_dir + '/best.pth.tar')
+        torch.save(state, f'{output_dir}/best.pth.tar')
         best_loss = nll_meter.avg
 
     # Save samples and data
